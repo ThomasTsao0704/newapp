@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>金控業財務分析報告 · TWSE</title>
+<style>
+:root{
+  --ink:#0f172a;--ink2:#334155;--ink3:#64748b;--ink4:#94a3b8;
+  --bg:#f1f5f9;--surface:#fff;--border:#e2e8f0;
+  --g:#059669;--g2:#d1fae5;--g3:#ecfdf5;
+  --r:#dc2626;--r2:#fecaca;--r3:#fef2f2;
+  --b:#2563eb;--b2:#bfdbfe;--b3:#eff6ff;
+  --am:#d97706;--am2:#fde68a;--am3:#fffbeb;
+  --pu:#7c3aed;--pu2:#ede9fe;
+  --rad:12px;--sh:0 2px 8px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,-apple-system,'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);font-size:13px;min-height:100vh;}
+
+/* ── HERO ── */
+.hero{background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 55%,#1d4ed8 100%);color:#fff;padding:40px 32px 36px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;right:-80px;top:-60px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.25) 0%,transparent 70%);}
+.hero::after{content:'';position:absolute;left:-40px;bottom:-80px;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(16,185,129,.18) 0%,transparent 70%);}
+.hero-inner{max-width:1080px;margin:0 auto;position:relative;z-index:1;}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:4px 12px;font-size:11px;color:#94a3b8;margin-bottom:14px;letter-spacing:.4px;}
+.hero h1{font-size:1.9rem;font-weight:800;letter-spacing:-.6px;line-height:1.15;margin-bottom:8px;}
+.hero h1 em{color:#60a5fa;font-style:normal;}
+.hero p{font-size:13px;color:#94a3b8;max-width:560px;line-height:1.6;}
+.hero-stats{display:flex;gap:28px;margin-top:22px;flex-wrap:wrap;}
+.hst{display:flex;flex-direction:column;}
+.hst-v{font-size:1.5rem;font-weight:800;color:#fff;}
+.hst-l{font-size:10px;color:#64748b;margin-top:1px;}
+.hero-date{position:absolute;right:0;top:0;font-size:11px;color:#475569;background:rgba(0,0,0,.2);padding:5px 12px;border-radius:0 0 0 8px;}
+
+/* ── LOADING ── */
+#loadingState{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:16px;}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--b);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-txt{font-size:13px;color:var(--ink3);}
+
+/* ── ERROR ── */
+.error-box{max-width:500px;margin:60px auto;background:var(--r3);border:1px solid var(--r2);border-radius:var(--rad);padding:24px;text-align:center;}
+.error-box h3{color:var(--r);margin-bottom:8px;}
+.error-box p{font-size:12px;color:var(--ink3);}
+
+/* ── SECTION ── */
+.section{max-width:1080px;margin:0 auto;padding:28px 20px;}
+.sec-hd{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+.sec-hd h2{font-size:14px;font-weight:700;color:var(--ink2);}
+.sec-hd::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ── SUMMARY BANNER ── */
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:24px;}
+.sum-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;box-shadow:var(--sh);}
+.sum-label{font-size:10px;color:var(--ink3);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+.sum-value{font-size:1.3rem;font-weight:800;color:var(--ink);}
+.sum-unit{font-size:10px;color:var(--ink4);font-weight:400;margin-left:2px;}
+.sum-sub{font-size:10px;color:var(--ink3);margin-top:2px;}
+
+/* ── RATING PILLS ── */
+.rating{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.r-sb{background:#dcfce7;color:#15803d;}
+.r-b {background:#dbeafe;color:#1d4ed8;}
+.r-n {background:#f1f5f9;color:#475569;}
+.r-u {background:#fef2f2;color:#b91c1c;}
+
+/* ── TIER LABEL ── */
+.tier-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;margin-bottom:10px;}
+.tier-a{background:#fef9c3;color:#713f12;}
+.tier-b{background:#e0f2fe;color:#0c4a6e;}
+.tier-c{background:#f1f5f9;color:#475569;}
+
+/* ── COMPANY CARDS ── */
+.company-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
+.co-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rad);padding:20px;box-shadow:var(--sh);position:relative;overflow:hidden;}
+.co-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:12px 0 0 12px;}
+.co-sb::before{background:#15803d;}
+.co-b::before{background:var(--b);}
+.co-n::before{background:var(--ink4);}
+.co-u::before{background:var(--r);}
+
+.co-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+.co-name{font-size:1rem;font-weight:800;}
+.co-code{font-size:11px;color:var(--ink4);font-family:monospace;margin-top:1px;}
+.co-eps{text-align:right;}
+.co-eps-v{font-size:1.4rem;font-weight:800;color:var(--ink);}
+.co-eps-l{font-size:10px;color:var(--ink4);}
+
+/* ── METRIC ROWS ── */
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0;}
+.met{background:#f8fafc;border-radius:7px;padding:8px 10px;}
+.met-l{font-size:10px;color:var(--ink3);margin-bottom:2px;}
+.met-v{font-size:13px;font-weight:700;color:var(--ink);}
+.met-v.good{color:var(--g);}
+.met-v.warn{color:var(--am);}
+.met-v.bad {color:var(--r);}
+
+/* ── PROGRESS BAR ── */
+.prog-wrap{margin:6px 0;}
+.prog-label{display:flex;justify-content:space-between;font-size:10px;color:var(--ink3);margin-bottom:3px;}
+.prog-bar{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;transition:width .5s ease;}
+.fill-b{background:var(--b);}
+.fill-g{background:var(--g);}
+.fill-am{background:var(--am);}
+.fill-r{background:var(--r);}
+
+/* ── ANALYSIS TEXT ── */
+.co-analysis{font-size:11.5px;color:var(--ink2);line-height:1.7;border-top:1px solid var(--border);padding-top:10px;margin-top:10px;}
+.co-risk{font-size:11px;color:var(--am);background:var(--am3);border-radius:5px;padding:5px 8px;margin-top:6px;}
+
+/* ── COMPARISON TABLE ── */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.comp-table{width:100%;border-collapse:collapse;font-size:12px;}
+.comp-table th{background:#f8fafc;font-weight:700;color:var(--ink3);padding:9px 10px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap;position:sticky;top:0;}
+.comp-table th.sort{cursor:pointer;user-select:none;}
+.comp-table th.sort:hover{color:var(--b);}
+.comp-table th.asc::after{content:' ↑';}
+.comp-table th.desc::after{content:' ↓';}
+.comp-table td{padding:9px 10px;border-bottom:1px solid #f1f5f9;white-space:nowrap;vertical-align:middle;}
+.comp-table tr:hover td{background:#f8fafc;}
+.comp-table .num{text-align:right;font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace;font-size:11.5px;}
+.comp-table .code{font-family:monospace;color:var(--ink4);font-size:11px;}
+.comp-table .name-col{font-weight:600;}
+.rank-no{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:700;margin-right:4px;}
+.rank-1{background:#fef9c3;color:#713f12;}
+.rank-2{background:#f1f5f9;color:#475569;}
+.rank-3{background:#fef3c7;color:#92400e;}
+
+/* ── RISK MATRIX ── */
+.risk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
+.risk-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.risk-title{font-size:11px;font-weight:700;color:var(--ink2);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.risk-badge{display:inline-block;width:8px;height:8px;border-radius:50%;}
+.rb-high{background:var(--r);}
+.rb-med{background:var(--am);}
+.rb-low{background:var(--g);}
+.risk-cos{font-size:11px;color:var(--ink3);line-height:1.6;}
+
+/* ── FOOTER ── */
+.footer{text-align:center;font-size:11px;color:var(--ink4);padding:24px;border-top:1px solid var(--border);margin-top:8px;}
+.footer a{color:var(--b);text-decoration:none;}
+
+/* ── DISCLAIMER ── */
+.disclaimer{background:var(--surface);border:1px solid var(--border);border-radius:var(--rad);padding:14px 18px;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--ink3);}
+</style>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div id="heroDate" class="hero-date"></div>
+  <div class="hero-inner">
+    <div class="hero-tag">🏦 TWSE · 金控業財務分析</div>
+    <h1>台灣金控業<em>專業分析報告</em></h1>
+    <p>即時串接 TWSE OpenAPI，自動計算 ROE、槓桿比、放存比等關鍵財務指標，生成分析師級別完整報告。</p>
+    <div class="hero-stats">
+      <div class="hst"><span class="hst-v" id="statCompanies">13</span><span class="hst-l">金控公司</span></div>
+      <div class="hst"><span class="hst-v" id="statTotalProfit">—</span><span class="hst-l">億元 總稅後淨利</span></div>
+      <div class="hst"><span class="hst-v" id="statAvgROE">—</span><span class="hst-l">平均 ROE</span></div>
+      <div class="hst"><span class="hst-v" id="statDataDate">114Q4</span><span class="hst-l">財報期間</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── LOADING ── -->
+<div id="loadingState">
+  <div class="spinner"></div>
+  <div class="load-txt">正在載入 TWSE 金控財務數據…</div>
+</div>
+
+<!-- ── MAIN REPORT (hidden until loaded) ── -->
+<div id="reportContent" style="display:none">
+
+  <!-- Summary -->
+  <div class="section" style="padding-bottom:4px;">
+    <div class="sec-hd"><h2>📊 產業總覽</h2></div>
+    <div class="summary-grid" id="summaryGrid"></div>
+  </div>
+
+  <!-- Rankings -->
+  <div class="section" style="padding-top:0;padding-bottom:4px;">
+    <div class="sec-hd"><h2>🏆 關鍵排行</h2></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;" id="rankingPanels"></div>
+  </div>
+
+  <!-- Company Cards -->
+  <div class="section" style="padding-top:16px;padding-bottom:4px;">
+    <div class="sec-hd"><h2>🏢 個股深度分析</h2></div>
+    <div class="company-grid" id="companyCards"></div>
+  </div>
+
+  <!-- Comparison Table -->
+  <div class="section" style="padding-top:16px;padding-bottom:4px;">
+    <div class="sec-hd"><h2>📋 全公司指標比較表</h2></div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rad);padding:0;overflow:hidden;box-shadow:var(--sh);">
+      <div class="tbl-wrap">
+        <table class="comp-table" id="compTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Risk Matrix -->
+  <div class="section" style="padding-top:16px;padding-bottom:4px;">
+    <div class="sec-hd"><h2>⚠️ 風險矩陣</h2></div>
+    <div class="risk-grid" id="riskGrid"></div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="section" style="padding-top:8px;">
+    <div class="disclaimer">
+      <span style="font-size:18px;">ℹ️</span>
+      <span>數據來源：<strong style="color:var(--ink2)">台灣證券交易所 TWSE OpenAPI</strong>（openapi.twse.com.tw/v1/opendata/t187ap06_L_fh · t187ap07_L_fh）· 透過 CORS Proxy 即時取得 · 財報期間：民國 114 年第 4 季（2025年全年）· 所有數據及評級<strong style="color:var(--r)">僅供參考，不構成投資建議</strong>。</span>
+    </div>
+  </div>
+
+</div><!-- /reportContent -->
+
+<div class="footer">
+  金控業財務分析報告 · 數據來源 <a href="https://openapi.twse.com.tw" target="_blank">TWSE OpenAPI</a> · 僅供學習研究使用
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CONFIG
+══════════════════════════════════════════════════════ */
+const IS_LOCAL = ['localhost','127.0.0.1','::1'].includes(location.hostname);
+const WORKER   = IS_LOCAL
+  ? `${location.protocol}//${location.host}/proxy`
+  : 'https://black-bonus-4618.s01yg3642.workers.dev/';
+const API_IS  = 'https://openapi.twse.com.tw/v1/opendata/t187ap06_L_fh'; // 損益表
+const API_BS  = 'https://openapi.twse.com.tw/v1/opendata/t187ap07_L_fh'; // 資產負債表
+const proxy   = u => WORKER + '?url=' + encodeURIComponent(u);
+
+/* ══════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const n = (v, digits=0) => {
+  const num = parseFloat(v) || 0;
+  return num.toLocaleString('zh-TW', {minimumFractionDigits: digits, maximumFractionDigits: digits});
+};
+const pct = v => (parseFloat(v)||0).toFixed(1) + '%';
+const toYi = v => ((parseFloat(v)||0) / 1e5); // 千元 → 億元
+const fYi  = (v, d=0) => n(toYi(v), d);
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ══════════════════════════════════════════════════════
+   HERO DATE
+══════════════════════════════════════════════════════ */
+(function(){
+  const d = new Date();
+  const roc = d.getFullYear()-1911;
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  $('heroDate').textContent = `民國 ${roc}年${mm}月${dd}日`;
+})();
+
+/* ══════════════════════════════════════════════════════
+   FETCH & MERGE
+══════════════════════════════════════════════════════ */
+async function fetchData(url){
+  const res = await fetch(proxy(url));
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function main(){
+  try {
+    const [isData, bsData] = await Promise.all([
+      fetchData(API_IS),
+      fetchData(API_BS)
+    ]);
+
+    // 以公司代號合併
+    const bsMap = {};
+    for(const row of bsData) bsMap[row['公司代號']] = row;
+
+    const companies = isData.map(is => {
+      const bs = bsMap[is['公司代號']] || {};
+      const netIncome       = parseFloat(is['本期稅後淨利（淨損）'])||0;
+      const totalEquity     = parseFloat(bs['權益總計'])||1;
+      const totalAssets     = parseFloat(bs['資產總計'])||1;
+      const totalLiabilities= parseFloat(bs['負債總計'])||0;
+      const loans           = parseFloat(bs['貼現及放款－淨額'])||0;
+      const deposits        = parseFloat(bs['存款及匯款'])||0;
+
+      const roe             = (netIncome / totalEquity) * 100;
+      const leverage        = totalAssets / totalEquity;
+      const debtRatio       = (totalLiabilities / totalAssets) * 100;
+      const ldr             = deposits > 0 ? (loans / deposits) * 100 : 0;
+
+      const eps             = parseFloat(is['基本每股盈餘（元）'])||0;
+      const oci             = parseFloat(is['本期其他綜合損益（稅後淨額）'])||0;
+      const compIncome      = parseFloat(is['本期綜合損益總額'])||0;
+      const interestIncome  = parseFloat(is['利息淨收益'])||0;
+      const nonInterest     = parseFloat(is['利息以外淨收益'])||0;
+      const opEx            = parseFloat(is['營業費用'])||0;
+      const provision       = parseFloat(is['呆帳費用、承諾及保證責任準備提存'])||0;
+      const insProvision    = parseFloat(is['保險負債準備淨變動'])||0;
+      const bookValue       = parseFloat(bs['每股參考淨值'])||0;
+      const capitalStock    = parseFloat(bs['股本'])||0;
+      const retainedEarnings= parseFloat(bs['保留盈餘'])||0;
+      const otherEquity     = parseFloat(bs['其他權益'])||0;
+      const goodwill        = parseFloat(bs['無形資產－淨額'])||0;
+      const insuranceRes    = parseFloat(bs['負債準備'])||0;
+
+      // 利息收益占比
+      const totalRev = interestIncome + Math.abs(nonInterest);
+      const interestPct = totalRev > 0 ? (interestIncome / totalRev) * 100 : 0;
+
+      // 評分
+      let score = 0;
+      if(eps >= 6) score += 4;
+      else if(eps >= 3) score += 3;
+      else if(eps >= 2) score += 2;
+      else if(eps >= 1) score += 1;
+      if(roe >= 13) score += 3;
+      else if(roe >= 10) score += 2;
+      else if(roe >= 8) score += 1;
+      if(leverage <= 13) score += 1;
+      if(leverage > 18) score -= 1;
+      if(ldr > 0 && ldr >= 68 && ldr <= 78) score += 1;
+      if(ldr > 80) score -= 1;
+
+      let rating, ratingCls, ratingText;
+      if(score >= 7){ rating='強力買進'; ratingCls='r-sb'; ratingText='Strong Buy'; }
+      else if(score >= 5){ rating='買進'; ratingCls='r-b'; ratingText='Buy'; }
+      else if(score >= 3){ rating='中立'; ratingCls='r-n'; ratingText='Neutral'; }
+      else { rating='減持'; ratingCls='r-u'; ratingText='Underweight'; }
+
+      // 卡片顏色
+      const cardCls = ratingText === 'Strong Buy' ? 'co-sb'
+                    : ratingText === 'Buy'         ? 'co-b'
+                    : ratingText === 'Neutral'     ? 'co-n' : 'co-u';
+
+      return {
+        code:            is['公司代號'],
+        name:            is['公司名稱'],
+        eps, roe, leverage, debtRatio, ldr,
+        netIncome, compIncome, oci,
+        totalAssets, totalEquity, totalLiabilities,
+        loans, deposits,
+        interestIncome, nonInterest, opEx, provision, insProvision,
+        bookValue, capitalStock, retainedEarnings, otherEquity, goodwill,
+        insuranceRes, interestPct,
+        score, rating, ratingCls, ratingText, cardCls
+      };
+    });
+
+    // 排序 by EPS 做全域 max 用於進度條
+    const maxNetIncome  = Math.max(...companies.map(c=>c.netIncome));
+    const maxTotalAssets= Math.max(...companies.map(c=>c.totalAssets));
+    const maxROE        = Math.max(...companies.map(c=>c.roe));
+    const maxEPS        = Math.max(...companies.map(c=>c.eps));
+
+    renderReport(companies, {maxNetIncome, maxTotalAssets, maxROE, maxEPS});
+
+  } catch(err){
+    $('loadingState').innerHTML = `
+      <div class="error-box">
+        <h3>⚠️ 載入失敗</h3>
+        <p>${esc(err.message)}</p>
+        <p style="margin-top:8px;">請確認 CORS Proxy 是否正常運作，或稍後再試。</p>
+        <button onclick="location.reload()" style="margin-top:12px;padding:6px 16px;background:var(--b);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;">重新載入</button>
+      </div>`;
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER
+══════════════════════════════════════════════════════ */
+function renderReport(cos, maxes){
+  $('loadingState').style.display = 'none';
+  $('reportContent').style.display = '';
+
+  const totalProfit = cos.reduce((s,c)=>s+c.netIncome,0);
+  const avgROE      = cos.reduce((s,c)=>s+c.roe,0) / cos.length;
+  const totalAssets = cos.reduce((s,c)=>s+c.totalAssets,0);
+
+  // Hero stats
+  $('statTotalProfit').textContent = n(toYi(totalProfit), 0);
+  $('statAvgROE').textContent      = pct(avgROE);
+
+  renderSummary(cos, totalProfit, avgROE, totalAssets);
+  renderRankings(cos);
+  renderCompanyCards(cos, maxes);
+  renderTable(cos);
+  renderRisk(cos);
+}
+
+/* ── Summary Grid ── */
+function renderSummary(cos, totalProfit, avgROE, totalAssets){
+  const byEPS = [...cos].sort((a,b)=>b.eps-a.eps);
+  const topEPS = byEPS[0];
+  const topROE = [...cos].sort((a,b)=>b.roe-a.roe)[0];
+  const html = [
+    {l:'總稅後淨利',     v: fYi(totalProfit,0),   u:'億元',  s:`${cos.length} 家金控合計`},
+    {l:'平均 ROE',       v: pct(avgROE),          u:'',      s:'全業加權估算'},
+    {l:'總資產規模',     v: n(toYi(totalAssets)/10000,1), u:'兆元', s:'業界整體規模'},
+    {l:'EPS 最高',       v: topEPS.eps.toFixed(2), u:'元',   s: topEPS.name},
+    {l:'ROE 最強',       v: pct(topROE.roe),       u:'',     s: topROE.name},
+    {l:'財報出表日期',   v: '114年3月25日',         u:'',     s: 'ROC 114Q4 數據'},
+  ].map(s=>`
+    <div class="sum-card">
+      <div class="sum-label">${esc(s.l)}</div>
+      <div class="sum-value">${esc(s.v)}<span class="sum-unit">${esc(s.u)}</span></div>
+      <div class="sum-sub">${esc(s.s)}</div>
+    </div>`).join('');
+  $('summaryGrid').innerHTML = html;
+}
+
+/* ── Ranking Panels ── */
+function renderRankings(cos){
+  const panels = [
+    {
+      title:'EPS 排行',
+      icon:'💰',
+      items:[...cos].sort((a,b)=>b.eps-a.eps).slice(0,5),
+      val: c => c.eps.toFixed(2) + ' 元',
+      bar: c => (c.eps / Math.max(...cos.map(x=>x.eps))) * 100,
+      fillCls: 'fill-b'
+    },{
+      title:'ROE 排行',
+      icon:'📈',
+      items:[...cos].sort((a,b)=>b.roe-a.roe).slice(0,5),
+      val: c => pct(c.roe),
+      bar: c => (c.roe / Math.max(...cos.map(x=>x.roe))) * 100,
+      fillCls: 'fill-g'
+    },{
+      title:'稅後淨利排行',
+      icon:'🏦',
+      items:[...cos].sort((a,b)=>b.netIncome-a.netIncome).slice(0,5),
+      val: c => fYi(c.netIncome,0) + ' 億',
+      bar: c => (c.netIncome / Math.max(...cos.map(x=>x.netIncome))) * 100,
+      fillCls: 'fill-am'
+    },{
+      title:'資產規模排行',
+      icon:'🏗️',
+      items:[...cos].sort((a,b)=>b.totalAssets-a.totalAssets).slice(0,5),
+      val: c => n(toYi(c.totalAssets)/10000,2) + ' 兆',
+      bar: c => (c.totalAssets / Math.max(...cos.map(x=>x.totalAssets))) * 100,
+      fillCls: 'fill-b'
+    }
+  ];
+
+  const html = panels.map(p=>`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rad);padding:16px;box-shadow:var(--sh);">
+      <div style="font-size:13px;font-weight:700;color:var(--ink2);margin-bottom:12px;">${p.icon} ${esc(p.title)}</div>
+      ${p.items.map((c,i)=>`
+        <div style="margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+            <span style="font-size:11px;display:flex;align-items:center;gap:4px;">
+              <span class="rank-no ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}</span>
+              <strong>${esc(c.name)}</strong>
+              <span style="color:var(--ink4);font-family:monospace;">${esc(c.code)}</span>
+            </span>
+            <span style="font-size:12px;font-weight:700;">${esc(p.val(c))}</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill ${p.fillCls}" style="width:${p.bar(c).toFixed(1)}%"></div></div>
+        </div>`).join('')}
+    </div>`).join('');
+  $('rankingPanels').innerHTML = html;
+}
+
+/* ── Company Cards ── */
+function renderCompanyCards(cos, maxes){
+  // 依評分 → EPS 排序
+  const sorted = [...cos].sort((a,b)=>b.score-a.score || b.eps-a.eps);
+
+  const html = sorted.map(c=>{
+    const epsBarPct    = ((c.eps / maxes.maxEPS) * 100).toFixed(1);
+    const assetBarPct  = ((c.totalAssets / maxes.maxTotalAssets) * 100).toFixed(1);
+    const roeBarPct    = ((c.roe / maxes.maxROE) * 100).toFixed(1);
+    const profitBarPct = ((c.netIncome / maxes.maxNetIncome) * 100).toFixed(1);
+
+    // 指標顏色判斷
+    const roeColor   = c.roe>=13?'good':c.roe>=8?'':'warn';
+    const levColor   = c.leverage<=13?'good':c.leverage>=18?'bad':'warn';
+    const ldrColor   = c.ldr>0?(c.ldr<=78?'good':c.ldr<=82?'warn':'bad'):'';
+    const debtColor  = c.debtRatio<=92?'good':c.debtRatio<=95?'warn':'bad';
+
+    // 分析文字
+    const analysis = buildAnalysis(c);
+
+    // 風險提示
+    const risk = buildRisk(c);
+
+    return `
+    <div class="co-card ${c.cardCls}">
+      <div class="co-hd">
+        <div>
+          <div class="co-name">${esc(c.name)}</div>
+          <div class="co-code">${esc(c.code)}</div>
+          <span class="rating ${c.ratingCls}" style="margin-top:6px;display:inline-flex;">${esc(c.rating)}</span>
+        </div>
+        <div class="co-eps">
+          <div class="co-eps-v">${c.eps.toFixed(2)}</div>
+          <div class="co-eps-l">EPS（元）</div>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="met">
+          <div class="met-l">ROE（估算）</div>
+          <div class="met-v ${roeColor}">${pct(c.roe)}</div>
+        </div>
+        <div class="met">
+          <div class="met-l">財務槓桿</div>
+          <div class="met-v ${levColor}">${c.leverage.toFixed(1)}x</div>
+        </div>
+        <div class="met">
+          <div class="met-l">放存比</div>
+          <div class="met-v ${ldrColor}">${c.ldr>0?pct(c.ldr):'—'}</div>
+        </div>
+        <div class="met">
+          <div class="met-l">負債比率</div>
+          <div class="met-v ${debtColor}">${pct(c.debtRatio)}</div>
+        </div>
+      </div>
+
+      <div class="prog-wrap">
+        <div class="prog-label"><span>稅後淨利</span><span>${fYi(c.netIncome,0)} 億元</span></div>
+        <div class="prog-bar"><div class="prog-fill fill-b" style="width:${profitBarPct}%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>資產規模</span><span>${n(toYi(c.totalAssets)/10000,2)} 兆元</span></div>
+        <div class="prog-bar"><div class="prog-fill fill-am" style="width:${assetBarPct}%"></div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>每股淨值</span><span>${c.bookValue.toFixed(2)} 元</span></div>
+        <div class="prog-bar"><div class="prog-fill fill-g" style="width:${Math.min(c.bookValue/70*100,100).toFixed(1)}%"></div></div>
+      </div>
+
+      <div class="co-analysis">${analysis}</div>
+      ${risk?`<div class="co-risk">⚠️ ${esc(risk)}</div>`:''}
+    </div>`;
+  }).join('');
+
+  $('companyCards').innerHTML = html;
+}
+
+function buildAnalysis(c){
+  const parts = [];
+  // 盈利
+  if(c.eps >= 6) parts.push(`EPS <strong>${c.eps.toFixed(2)} 元</strong>居業界之冠，獲利能力卓越。`);
+  else if(c.eps >= 3) parts.push(`EPS <strong>${c.eps.toFixed(2)} 元</strong>表現強勁，獲利明確。`);
+  else if(c.eps >= 2) parts.push(`EPS <strong>${c.eps.toFixed(2)} 元</strong>穩健，屬中上水準。`);
+  else if(c.eps >= 1) parts.push(`EPS <strong>${c.eps.toFixed(2)} 元</strong>，獲利尚稱平穩。`);
+  else parts.push(`EPS 僅 <strong>${c.eps.toFixed(2)} 元</strong>，獲利能力待提升。`);
+
+  // ROE
+  if(c.roe >= 13) parts.push(`ROE <strong>${pct(c.roe)}</strong>，資本運用效率業界領先。`);
+  else if(c.roe >= 10) parts.push(`ROE <strong>${pct(c.roe)}</strong>，資本報酬表現良好。`);
+  else if(c.roe >= 7) parts.push(`ROE <strong>${pct(c.roe)}</strong>，效率中等，仍有改善空間。`);
+  else parts.push(`ROE 僅 <strong>${pct(c.roe)}</strong>，資本效率偏低。`);
+
+  // 資產
+  const assetTri = toYi(c.totalAssets) / 10000;
+  if(assetTri >= 10) parts.push(`資產規模達 <strong>${assetTri.toFixed(1)} 兆元</strong>，具明顯規模優勢。`);
+  else if(assetTri >= 5) parts.push(`資產規模 <strong>${assetTri.toFixed(1)} 兆元</strong>，屬中大型金控。`);
+  else if(assetTri >= 2) parts.push(`資產規模 <strong>${assetTri.toFixed(1)} 兆元</strong>，中型金控。`);
+  else parts.push(`資產規模 <strong>${(toYi(c.totalAssets)).toFixed(0)} 億元</strong>，業務聚焦特化市場。`);
+
+  // OCI
+  if(c.oci < -100*1e5 && toYi(c.oci) < -100) parts.push(`其他綜合損益 <strong>${fYi(c.oci,0)} 億元</strong>（評價損），受利率波動影響顯著。`);
+  else if(c.oci > 50*1e5) parts.push(`其他綜合損益 <strong>+${fYi(c.oci,0)} 億元</strong>，帳面評價利益豐厚。`);
+
+  // 放存比
+  if(c.ldr > 0){
+    if(c.ldr <= 72) parts.push(`放存比 <strong>${pct(c.ldr)}</strong>，放款空間充足，未來成長動能強。`);
+    else if(c.ldr <= 78) parts.push(`放存比 <strong>${pct(c.ldr)}</strong>，處於適中區間。`);
+    else parts.push(`放存比 <strong>${pct(c.ldr)}</strong>偏高，流動性管理需注意。`);
+  }
+
+  return parts.join(' ');
+}
+
+function buildRisk(c){
+  const risks = [];
+  if(c.leverage > 18) risks.push(`財務槓桿高達 ${c.leverage.toFixed(1)} 倍`);
+  if(c.ldr > 80) risks.push(`放存比 ${pct(c.ldr)} 偏高`);
+  if(c.goodwill > 500*1e5) risks.push(`無形資產（含商譽）${fYi(c.goodwill,0)} 億元，減損風險存在`);
+  if(c.otherEquity < -200*1e5) risks.push(`其他權益 ${fYi(c.otherEquity,0)} 億元（評價損）`);
+  if(c.insProvision > 500*1e5) risks.push(`保險負債準備提存 ${fYi(c.insProvision,0)} 億元，壽險業務壓力大`);
+  return risks.join('；');
+}
+
+/* ── Comparison Table ── */
+function renderTable(cos){
+  const sorted = [...cos].sort((a,b)=>b.eps-a.eps);
+  let currentSortKey = 'eps';
+  let currentSortAsc = false;
+
+  const cols = [
+    {key:'rank',    label:'#',         render:(c,i)=>`<td class="num">${i+1}</td>`},
+    {key:'name',    label:'公司',      render:c=>`<td><span class="name-col">${esc(c.name)}</span> <span class="code">${esc(c.code)}</span></td>`},
+    {key:'eps',     label:'EPS（元）', sort:true, render:c=>`<td class="num"><strong>${c.eps.toFixed(2)}</strong></td>`},
+    {key:'roe',     label:'ROE',       sort:true, render:c=>`<td class="num" style="color:${c.roe>=10?'var(--g)':c.roe>=7?'var(--am)':'var(--r)'}">${pct(c.roe)}</td>`},
+    {key:'netIncome',label:'稅後淨利（億）', sort:true, render:c=>`<td class="num">${fYi(c.netIncome,0)}</td>`},
+    {key:'totalAssets',label:'資產（兆）', sort:true, render:c=>`<td class="num">${n(toYi(c.totalAssets)/10000,2)}</td>`},
+    {key:'leverage',label:'槓桿',      sort:true, render:c=>`<td class="num" style="color:${c.leverage<=14?'var(--g)':c.leverage>=18?'var(--r)':'var(--am)'}">${c.leverage.toFixed(1)}x</td>`},
+    {key:'debtRatio',label:'負債比',   sort:true, render:c=>`<td class="num">${pct(c.debtRatio)}</td>`},
+    {key:'ldr',     label:'放存比',    sort:true, render:c=>`<td class="num">${c.ldr>0?pct(c.ldr):'—'}</td>`},
+    {key:'bookValue',label:'每股淨值', sort:true, render:c=>`<td class="num">${c.bookValue.toFixed(2)}</td>`},
+    {key:'rating',  label:'評級',      render:c=>`<td><span class="rating ${c.ratingCls}">${esc(c.rating)}</span></td>`},
+  ];
+
+  function buildTable(data){
+    const thead = `<thead><tr>${cols.map(col=>{
+      if(!col.sort) return `<th>${esc(col.label)}</th>`;
+      const isActive = col.key === currentSortKey;
+      const cls = isActive ? (currentSortAsc ? 'sort asc' : 'sort desc') : 'sort';
+      return `<th class="${cls}" data-key="${col.key}">${esc(col.label)}</th>`;
+    }).join('')}</tr></thead>`;
+
+    const tbody = `<tbody>${data.map((c,i)=>`<tr>${cols.map(col=>col.render(c,i)).join('')}</tr>`).join('')}</tbody>`;
+    return thead + tbody;
+  }
+
+  const tbl = $('compTable');
+  tbl.innerHTML = buildTable(sorted);
+
+  tbl.addEventListener('click', e=>{
+    const th = e.target.closest('th[data-key]');
+    if(!th) return;
+    const key = th.dataset.key;
+    if(key === currentSortKey) currentSortAsc = !currentSortAsc;
+    else { currentSortKey = key; currentSortAsc = false; }
+    const s = currentSortAsc ? 1 : -1;
+    const re = [...cos].sort((a,b)=>(a[key]>b[key]?1:a[key]<b[key]?-1:0)*s);
+    tbl.innerHTML = buildTable(re);
+  });
+}
+
+/* ── Risk Matrix ── */
+function renderRisk(cos){
+  const risks = [
+    {
+      level:'high', title:'利率 / 評價風險',
+      desc: '壽險業務為主的金控（富邦金、國泰金、凱基金）因持有大量債券及保單，利率波動導致其他綜合損益顯著波動，IFRS 17 接軌後保險負債準備壓力加大。',
+      cos: '富邦金、國泰金、台新新光金、凱基金'
+    },{
+      level:'high', title:'合併整合風險',
+      desc: '台新新光金控完成合併後，無形資產（商譽）高達 6,749 億元，IT系統整合、人員精簡與文化融合均為複雜挑戰，短期整合成本壓力顯著。',
+      cos: '台新新光金 (2887)'
+    },{
+      level:'med', title:'信用 / 逾放風險',
+      desc: '放款規模龐大的金控（中信金放款 4.24 兆、合庫金 3.13 兆）在景氣下行時面臨企業及個人逾放比上升風險，合庫金呆帳提存偏高需持續關注。',
+      cos: '中信金、合庫金、玉山金'
+    },{
+      level:'med', title:'市場 / 自營部位風險',
+      desc: '元大金（自營資產 7,759 億元）、凱基金（6,941 億元）的公允價值金融資產比例高，台股成交量萎縮或市場大幅修正時衝擊直接。',
+      cos: '元大金 (2885)、凱基金 (2883)'
+    },{
+      level:'med', title:'匯率風險',
+      desc: '具大規模海外資產的金控在美元走強/走弱時面臨匯兌損益波動，其他綜合損益項目反映此類評價損益。',
+      cos: '兆豐金、富邦金、中信金'
+    },{
+      level:'low', title:'流動性風險',
+      desc: '國票金（附買回票券負債 2,751 億元）業務高度依賴貨幣市場利差，無吸收存款緩衝；其餘官股金控（合庫金、第一金）存放央行規模充裕，流動性風險相對低。',
+      cos: '國票金 (2889)'
+    },{
+      level:'low', title:'效率 / 競爭風險',
+      desc: '官股金控（合庫金、第一金、華南金）因體制因素ROE普遍落後民營同業 2–4%，在利差收窄趨勢下盈利成長動能相對受限。',
+      cos: '合庫金、第一金、華南金'
+    }
+  ];
+
+  const levelMap = {high:{cls:'rb-high',txt:'高'},med:{cls:'rb-med',txt:'中'},low:{cls:'rb-low',txt:'低'}};
+  const html = risks.map(r=>`
+    <div class="risk-item">
+      <div class="risk-title">
+        <span class="risk-badge ${levelMap[r.level].cls}"></span>
+        ${esc(r.title)}
+        <span style="font-size:9px;color:var(--ink4);margin-left:auto;">風險 ${levelMap[r.level].txt}</span>
+      </div>
+      <div class="risk-cos" style="margin-bottom:4px;font-weight:600;color:var(--ink2);">影響對象：${esc(r.cos)}</div>
+      <div class="risk-cos">${esc(r.desc)}</div>
+    </div>`).join('');
+  $('riskGrid').innerHTML = html;
+}
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+main();
+</script>
+</body>
+</html>
