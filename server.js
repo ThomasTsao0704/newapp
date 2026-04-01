@@ -4,7 +4,7 @@
  * - /proxy?url= 代理 TWSE / TPEX API（繞過 CORS）
  *
  * 啟動：node server.js
- * 瀏覽：http://localhost:3000/daily-report.html
+ * 瀏覽：http://localhost:3000/
  *
  * 不需要安裝任何 npm 套件，只需 Node.js 18+
  */
@@ -122,7 +122,7 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, () => {
   console.log(`\n✅ 本機伺服器啟動成功`);
-  console.log(`   http://localhost:${PORT}/daily-report.html   每日收盤行情`);
+  console.log(`   http://localhost:${PORT}/              每日收盤行情`);
   console.log(`   http://localhost:${PORT}/fh-analysis.html    金控分析`);
   console.log(`   http://localhost:${PORT}/index.html          首頁`);
   console.log(`\n   代理 API：http://localhost:${PORT}/proxy?url=<encoded_url>`);
